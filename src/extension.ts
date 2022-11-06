@@ -219,7 +219,7 @@ export function activate(context: vscode.ExtensionContext) {
 		parseLuaFiles(workspacePath, tsilPath);
 
 		//Calculate dependencies
-		const dependenciesFile = fs.readFileSync(path.join(context.extensionPath, "/src/data/dependencies.json"), 'utf-8');
+		const dependenciesFile = fs.readFileSync(path.join(context.extensionPath, "/out/data/dependencies.json"), 'utf-8');
 		const dependencies: {[key: string]: string[]} = JSON.parse(dependenciesFile);
 
 		const usedModules = TSILParser.getUsedModules();
@@ -244,7 +244,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 		}while(hasAddedModule);
 
-		const libBasePath = path.join(context.extensionPath, "/src/data/lib");
+		const libBasePath = path.join(context.extensionPath, "/out/data/lib");
 
 		//Convert enums to just the enum type
 		const usedModulesList: string[] = [];
