@@ -11,7 +11,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:library-of-isaac-extension.build-project"
+    "onCommand:library-of-isaac-extension.build-project",
+    "onCommand:library-of-isaac-extension.init-project"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -19,6 +20,10 @@
       {
         "command": "library-of-isaac-extension.build-project",
         "title": "Build Isaac Project"
+      },
+      {
+        "command": "library-of-isaac-extension.init-project",
+        "title": "Init Isaac Project"
       }
     ]
   },

@@ -5,6 +5,27 @@ import { TextEncoder } from 'util';
 import * as path from "path";
 
 
+function findLuaCfgFile(pathToSearch: string): string|undefined{
+	const files = fs.readdirSync(pathToSearch);
+
+	for (let index = 0; index < files.length; index++) {
+		const file = files[index];
+
+		if(file === ".luarc.json"){
+			return pathToSearch;
+		}else if(fs.lstatSync(path.join(pathToSearch, file)).isDirectory()){
+			const found = findLuaCfgFile(path.join(pathToSearch, file));
+
+			if(found !== undefined){
+				return found;
+			}
+		}
+	}
+
+	return undefined;
+}
+
+
 function findTSILFile(pathToSearch: string) : string|undefined{
 	const files = fs.readdirSync(pathToSearch);
 
@@ -190,7 +211,46 @@ function moveFilesToLibrary(baseLibPath: string, tsilPath: string, filePath: str
 
 
 export function activate(context: vscode.ExtensionContext) {
-	let disposable = vscode.commands.registerCommand('library-of-isaac-extension.build-project', () => {
+	let initProject = vscode.commands.registerCommand('library-of-isaac-extension.init-project', () => {
+		const workspaceFolders = vscode.workspace.workspaceFolders;
+
+		if(workspaceFolders === undefined){ return; }
+
+		let workspacePath = workspaceFolders[0].uri.fsPath; // gets the path of the first workspace folder
+
+		const luaCfgPath = findLuaCfgFile(workspacePath);
+
+		if(luaCfgPath === undefined){
+			vscode.window.showErrorMessage("Can't find .luarc.json file, make sure you installed the required extensions");
+			return;
+		}
+		const fullLuaCfgPath = path.join(luaCfgPath, ".luarc.json");
+		const luarcContents = fs.readFileSync(fullLuaCfgPath, {encoding: "utf-8"});
+		const luarcConfig = JSON.parse(luarcContents);
+
+		luarcConfig["workspace.library"].push(path.join(context.extensionPath, "out", "emmylua"));
+		luarcConfig["diagnostics.globals"].push("TSIL");
+
+		const newContents = JSON.stringify(luarcConfig);
+		const luaCfgFile = vscode.Uri.file(fullLuaCfgPath);
+
+		const workspaceEdit = new vscode.WorkspaceEdit();
+		const encoder = new TextEncoder();
+
+		workspaceEdit.createFile(luaCfgFile, { 
+			overwrite: true,
+			ignoreIfExists: true,
+			contents: encoder.encode(newContents)
+		});
+
+		vscode.workspace.applyEdit(workspaceEdit);
+
+		vscode.window.showInformationMessage("Updated .luarc.json file");
+	});
+
+	context.subscriptions.push(initProject);
+
+	let buildProject = vscode.commands.registerCommand('library-of-isaac-extension.build-project', () => {
 		const workspaceFolders = vscode.workspace.workspaceFolders;
 
 		if(workspaceFolders === undefined){ return; }
@@ -299,7 +359,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.workspace.applyEdit(workspaceEdit);
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(buildProject);
 }
 
 export function deactivate() {}
