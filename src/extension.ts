@@ -88,7 +88,14 @@ function writeFileToLibrary(tsilPath: string, relativePath: string, content: str
 
 	const filePath = vscode.Uri.file(path.join(tsilPath, relativePath));
 
-	if(fs.existsSync(filePath.toString())){ return; }
+	if(fs.existsSync(filePath.toString())){ 
+		const oldContents = fs.readFileSync(filePath.toString(), {encoding: "utf-8"});
+
+		if(oldContents.length >= content.length){
+			//Old contents where the same or more
+			return;
+		}
+	}
 
 	workspaceEdit.createFile(filePath, { 
 		overwrite: true,
@@ -191,6 +198,7 @@ function minifyLuaFile(baseLibfile: string, relativePath: string, tsilPath: stri
 	(addCallback !== undefined && addCallback)){
 		forcedFiles.forEach(forcedFile => {
 			const content = fs.readFileSync(path.join(baseLibfile, forcedFile), 'utf-8');
+	
 			writeFileToLibrary(tsilPath, forcedFile, content, workspaceEdit);
 		});
 
@@ -207,6 +215,69 @@ function moveFilesToLibrary(baseLibPath: string, tsilPath: string, filePath: str
 			moveFilesToLibrary(baseLibPath, tsilPath, path.join(filePath, file), usedModules, workspaceEdit);
 		}
 	});
+}
+
+
+function updateUsedModulesListFiles(pathToSearch: string, usedModulesList: string[]){
+	fs.readdirSync(pathToSearch).forEach(file => {
+		if(fs.lstatSync(path.join(pathToSearch, file)).isDirectory()){
+			updateUsedModulesListFiles(path.join(pathToSearch, file), usedModulesList);
+		}else if(file.endsWith(".lua")){
+			const fileContents = fs.readFileSync(path.join(pathToSearch, file), {encoding: "utf-8"});
+			TSILParser.parseLuaFile(fileContents);
+		}
+	});
+}
+
+
+function updateUsedModulesList(tsilPath: string, usedModulesList: string[]){
+	fs.readdirSync(tsilPath).forEach(file => {
+		if(fs.lstatSync(path.join(tsilPath, file)).isDirectory()){
+			updateUsedModulesListFiles(path.join(tsilPath, file), usedModulesList);
+		}
+	});
+}
+
+
+function getModulesList(dependencies: {[key: string]: string[]}): string[]{
+	const usedModules = TSILParser.getUsedModules();
+	let hasAddedModule = false;
+
+	do{
+		hasAddedModule = false;
+
+		usedModules.forEach(usedModule => {
+			const moduleDependencies = dependencies[usedModule];	
+
+			if(moduleDependencies === undefined){ return; }
+
+			moduleDependencies.forEach(moduleDependency => {
+				if(!usedModules.has(moduleDependency)){
+					hasAddedModule = true;
+				}
+
+				usedModules.add(moduleDependency);
+			});
+		});
+
+	}while(hasAddedModule);
+
+	//Convert enums to just the enum type
+	const usedModulesList: string[] = [];
+	usedModules.forEach(usedModule =>{
+		if(usedModule === "TSIL"){ return; }
+
+		if(usedModule.startsWith("TSIL.Enums") && !usedModule.startsWith("TSIL.Enums.CustomCallback")){
+			const tokens = usedModule.split(".");
+			tokens.pop();
+			let newModule = tokens.join(".");
+			usedModulesList.push(newModule);
+		}else{
+			usedModulesList.push(usedModule);
+		}
+	});
+
+	return usedModulesList;
 }
 
 
@@ -282,44 +353,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const dependenciesFile = fs.readFileSync(path.join(context.extensionPath, "/out/data/dependencies.json"), 'utf-8');
 		const dependencies: {[key: string]: string[]} = JSON.parse(dependenciesFile);
 
-		const usedModules = TSILParser.getUsedModules();
-		let hasAddedModule = false;
-
-		do{
-			hasAddedModule = false;
-
-			usedModules.forEach(usedModule => {
-				const moduleDependencies = dependencies[usedModule];	
-
-				if(moduleDependencies === undefined){ return; }
-
-				moduleDependencies.forEach(moduleDependency => {
-					if(!usedModules.has(moduleDependency)){
-						hasAddedModule = true;
-					}
-
-					usedModules.add(moduleDependency);
-				});
-			});
-
-		}while(hasAddedModule);
-
-		const libBasePath = path.join(context.extensionPath, "/out/data/lib");
-
-		//Convert enums to just the enum type
-		const usedModulesList: string[] = [];
-		usedModules.forEach(usedModule =>{
-			if(usedModule === "TSIL"){ return; }
-
-			if(usedModule.startsWith("TSIL.Enums") && !usedModule.startsWith("TSIL.Enums.CustomCallback")){
-				const tokens = usedModule.split(".");
-				tokens.pop();
-				let newModule = tokens.join(".");
-				usedModulesList.push(newModule);
-			}else{
-				usedModulesList.push(usedModule);
-			}
-		});
+		let usedModulesList = getModulesList(dependencies);
 
 		//Remove all files inside the tsil folde
 		const workspaceEdit = new vscode.WorkspaceEdit();
@@ -334,6 +368,8 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.workspace.applyEdit(workspaceEdit);
 			return;
 		}
+
+		const libBasePath = path.join(context.extensionPath, "/out/data/lib");
 
 		const mandatoryFiles = [
 			"TSIL.lua",
@@ -354,7 +390,21 @@ export function activate(context: vscode.ExtensionContext) {
 			writeFileToLibrary(tsilPath, mandatoryFile, content, workspaceEdit);
 		});
 
-		moveFilesToLibrary(libBasePath, tsilPath, "", usedModulesList, workspaceEdit);
+		while(true){
+			moveFilesToLibrary(libBasePath, tsilPath, "", usedModulesList, workspaceEdit);
+
+			//Check if we are missing any modules
+			const oldUsedModulesLength = usedModulesList.length;
+			updateUsedModulesList(tsilPath, usedModulesList);
+			usedModulesList = getModulesList(dependencies);
+			const newUsedModulesLength = usedModulesList.length;
+
+			console.log(oldUsedModulesLength + " -> " + newUsedModulesLength);
+
+			if(newUsedModulesLength === oldUsedModulesLength){
+				break;
+			}
+		}
 
 		vscode.workspace.applyEdit(workspaceEdit);
 	});

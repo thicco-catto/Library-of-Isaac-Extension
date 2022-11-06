@@ -116,6 +116,7 @@ function onCreateNode(node: parser.Node){
                 const init = node.init[i];
                 let value: string = "";
 
+                if(init === undefined){ break; }
                 if(init.type === undefined){ break; }
 
                 if(init.type === "Identifier"){
@@ -162,7 +163,6 @@ export function parseLuaFile(luaString : string){
         onCreateScope: onCreateScope,
         onDestroyScope: onDestroyScope
     });
-    //console.log(JSON.stringify(ast, null, 4));
 }
 
 
