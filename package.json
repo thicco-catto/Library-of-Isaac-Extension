@@ -1,5 +1,6 @@
 {
   "name": "library-of-isaac-extension",
+  "publisher": "ThiccoCatto",
   "displayName": "Library Of Isaac Extension",
   "description": "Helper extension to develop mods using the library of Isaac.",
   "version": "0.0.1",

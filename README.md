@@ -4,7 +4,8 @@ This extension is for the Library of Isaac and makes coding mods easier.
 
 ## Features
 
-Autocompletes
+Use `Init Isaac Project` to initialize the autocomplete.
+Use `Build Isaac Project` to create the necessary files for the libary.
 
 ## Requirements
 
@@ -19,4 +20,8 @@ None for now
 ### 1.0.0
 
 Initial release of Library Of Isaac Extension
+
+### 1.0.1
+
+Changed library to use vanilla custom callback system
 
