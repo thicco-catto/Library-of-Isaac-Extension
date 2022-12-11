@@ -34,3 +34,7 @@ Updated library
 Fixed library init function not working properly
 Fixed build command not working properly
 Updated library
+
+### 0.1.0
+
+Improved build command.

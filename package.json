@@ -3,7 +3,7 @@
   "publisher": "ThiccoCatto",
   "displayName": "Library Of Isaac Extension",
   "description": "Helper extension to develop mods using the library of Isaac.",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "repository": "https://github.com/thicco-catto/Library-of-Isaac-Extension",
   "engines": {
     "vscode": "^1.73.0"
