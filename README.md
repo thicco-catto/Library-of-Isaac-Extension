@@ -17,11 +17,20 @@ None for now
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
-Initial release of Library Of Isaac Extension
+Beta release of Library Of Isaac Extension
 
-### 1.0.1
+### 0.0.2
 
 Changed library to use vanilla custom callback system
 
+### 0.0.3
+
+Updated library
+
+### 0.0.4
+
+Fixed library init function not working properly
+Fixed build command not working properly
+Updated library

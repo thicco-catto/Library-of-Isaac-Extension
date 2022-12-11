@@ -105,7 +105,7 @@ function writeFileToLibrary(tsilPath: string, relativePath: string, content: str
 }
 
 
-function minifyLuaFile(baseLibfile: string, relativePath: string, tsilPath: string, usedModules: string[], workspaceEdit: vscode.WorkspaceEdit){
+function minifyLuaFile(baseLibfile: string, relativePath: string, tsilPath: string, usedModules: string[], workspaceEdit: vscode.WorkspaceEdit, addedFiles: string[]){
 	const fileContents = fs.readFileSync(path.join(baseLibfile, relativePath), 'utf-8');
 	const fileLines = fileContents.split("\n");
 	let minifiedContents = "";
@@ -200,40 +200,51 @@ function minifyLuaFile(baseLibfile: string, relativePath: string, tsilPath: stri
 			const content = fs.readFileSync(path.join(baseLibfile, forcedFile), 'utf-8');
 	
 			writeFileToLibrary(tsilPath, forcedFile, content, workspaceEdit);
+
+			addedFiles.push(path.join(tsilPath, forcedFile));
 		});
+
+		addedFiles.push(path.join(tsilPath, relativePath));
 
 		writeFileToLibrary(tsilPath, relativePath, minifiedContents.trim(), workspaceEdit);
 	}
 }
 
 
-function moveFilesToLibrary(baseLibPath: string, tsilPath: string, filePath: string, usedModules: string[], workspaceEdit: vscode.WorkspaceEdit){
+function moveFilesToLibrary(baseLibPath: string, tsilPath: string, filePath: string, usedModules: string[], workspaceEdit: vscode.WorkspaceEdit, addedFiles: string[]){
 	fs.readdirSync(path.join(baseLibPath, filePath)).forEach(file => {
 		if(file.endsWith(".lua")){
-			minifyLuaFile(baseLibPath, path.join(filePath, file), tsilPath, usedModules, workspaceEdit);
+			minifyLuaFile(baseLibPath, path.join(filePath, file), tsilPath, usedModules, workspaceEdit, addedFiles);
 		}else if(fs.lstatSync(path.join(baseLibPath, filePath, file)).isDirectory()){
-			moveFilesToLibrary(baseLibPath, tsilPath, path.join(filePath, file), usedModules, workspaceEdit);
+			moveFilesToLibrary(baseLibPath, tsilPath, path.join(filePath, file), usedModules, workspaceEdit, addedFiles);
 		}
 	});
 }
 
 
-function updateUsedModulesListFiles(pathToSearch: string, usedModulesList: string[]){
+function updateUsedModulesListFiles(pathToSearch: string, usedModulesList: string[], addedFiles: string[]){
 	fs.readdirSync(pathToSearch).forEach(file => {
 		if(fs.lstatSync(path.join(pathToSearch, file)).isDirectory()){
-			updateUsedModulesListFiles(path.join(pathToSearch, file), usedModulesList);
+			updateUsedModulesListFiles(path.join(pathToSearch, file), usedModulesList, addedFiles);
 		}else if(file.endsWith(".lua")){
-			const fileContents = fs.readFileSync(path.join(pathToSearch, file), {encoding: "utf-8"});
-			TSILParser.parseLuaFile(fileContents);
+			const foundFile = addedFiles.find(s => {
+				const fullPath = path.join(pathToSearch, file);
+				return fullPath.includes(s);
+			});
+
+			if(foundFile !== undefined){
+				const fileContents = fs.readFileSync(path.join(pathToSearch, file), {encoding: "utf-8"});
+				TSILParser.parseLuaFile(fileContents);
+			}
 		}
 	});
 }
 
 
-function updateUsedModulesList(tsilPath: string, usedModulesList: string[]){
+function updateUsedModulesList(tsilPath: string, usedModulesList: string[], addedFiles: string[]){
 	fs.readdirSync(tsilPath).forEach(file => {
 		if(fs.lstatSync(path.join(tsilPath, file)).isDirectory()){
-			updateUsedModulesListFiles(path.join(tsilPath, file), usedModulesList);
+			updateUsedModulesListFiles(path.join(tsilPath, file), usedModulesList, addedFiles);
 		}
 	});
 }
@@ -345,17 +356,17 @@ export function activate(context: vscode.ExtensionContext) {
 			tsilPath = path.join(mainLuaPath, "LibraryOfIsaac"); 
 		}
 
-		TSILParser.resetUsedModules();
-
-		parseLuaFiles(workspacePath, tsilPath);
-
 		//Calculate dependencies
 		const dependenciesFile = fs.readFileSync(path.join(context.extensionPath, "/out/data/dependencies.json"), 'utf-8');
 		const dependencies: {[key: string]: string[]} = JSON.parse(dependenciesFile);
 
+		TSILParser.resetUsedModules();
+
+		parseLuaFiles(workspacePath, tsilPath);
+
 		let usedModulesList = getModulesList(dependencies);
 
-		//Remove all files inside the tsil folde
+		//Remove all files inside the tsil folder
 		const workspaceEdit = new vscode.WorkspaceEdit();
 		fs.readdirSync(tsilPath).forEach(file => {
 			if(tsilPath === undefined){ return; } //ts crying again
@@ -374,14 +385,6 @@ export function activate(context: vscode.ExtensionContext) {
 		const mandatoryFiles = [
 			"TSIL.lua",
 			"scripts.lua",
-			"CustomCallbacks/AddCustomCallback.lua",
-			"CustomCallbacks/AddVanillaCallback.lua",
-			"CustomCallbacks/InternalCallbacks.lua",
-			"CustomCallbacks/RegisterVanillaCallbacks.lua",
-			"CustomCallbacks/RemoveCustomCallback.lua",
-			"CustomCallbacks/RemoveVanillaCallback.lua",
-			"Enums/CallbackPriority.lua",
-			"Enums/CustomCallback.lua"
 		];
 		mandatoryFiles.forEach(mandatoryFile => {
 			if(tsilPath === undefined){ return; } //typecript is crying idk
@@ -391,15 +394,14 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 
 		while(true){
-			moveFilesToLibrary(libBasePath, tsilPath, "", usedModulesList, workspaceEdit);
+			const addedFiles: string[] = [];
+			moveFilesToLibrary(libBasePath, tsilPath, "", usedModulesList, workspaceEdit, addedFiles);
 
 			//Check if we are missing any modules
 			const oldUsedModulesLength = usedModulesList.length;
-			updateUsedModulesList(tsilPath, usedModulesList);
+			updateUsedModulesList(tsilPath, usedModulesList, addedFiles);
 			usedModulesList = getModulesList(dependencies);
 			const newUsedModulesLength = usedModulesList.length;
-
-			console.log(oldUsedModulesLength + " -> " + newUsedModulesLength);
 
 			if(newUsedModulesLength === oldUsedModulesLength){
 				break;
