@@ -38,3 +38,7 @@ Updated library
 ### 0.1.0
 
 Improved build command.
+
+### 0.1.1
+
+Updated library
