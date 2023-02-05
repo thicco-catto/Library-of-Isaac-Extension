@@ -28,6 +28,7 @@ const v: BuildProjectVariables = {
 const MANDATORY_FILES = [
     "TSIL.lua",
     "scripts.lua",
+    "modules.lua"
 ];
 
 
