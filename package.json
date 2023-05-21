@@ -6,7 +6,7 @@
   "version": "0.1.2",
   "repository": "https://github.com/thicco-catto/Library-of-Isaac-Extension",
   "engines": {
-    "vscode": "^1.72.0"
+    "vscode": "^1.73.0"
   },
   "categories": [
     "Other"
