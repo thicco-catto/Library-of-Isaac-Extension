@@ -28,7 +28,9 @@ const v: BuildProjectVariables = {
 const MANDATORY_FILES = [
     "TSIL.lua",
     "scripts.lua",
-    "modules.lua"
+    "Enums\\CustomCallback.lua",
+    "CustomCallbacks\\InternalCallbacks.lua",
+    "CustomCallbacks\\RegisterCustomCallback.lua"
 ];
 
 
@@ -40,6 +42,8 @@ function writeFileToLibrary(relativePath: string, content: string){
 	const filePath = Uri.file(fullFilePath);
 
 	if(existsSync(filePath.toString())){ 
+        if(MANDATORY_FILES.includes(relativePath)) { return; }
+
 		const oldContents = readFileSync(filePath.toString(), {encoding: "utf-8"});
 
 		if(oldContents.length >= content.length){
@@ -116,17 +120,17 @@ function handleSpecialComment(line: string, forcedFiles: string[]): boolean{
         const callback = line.replace("--##", "").trim();
         const fullCallbackName = "TSIL.Enums.CustomCallback." + callback;
 
-        v.usedModules.forEach(module => {
-            if(module.startsWith("TSIL.Enums.CustomCallback.")){
-                if(callback === "POST_NEW_ROOM_EARLY"){
-                    console.log(module);
-                }
+        // v.usedModules.forEach(module => {
+        //     if(module.startsWith("TSIL.Enums.CustomCallback.")){
+        //         if(callback === "POST_NEW_ROOM_EARLY"){
+        //             console.log(module);
+        //         }
                 
-            }
-        });
+        //     }
+        // });
 
         if(v.usedModules.has(fullCallbackName)){
-            console.log(fullCallbackName);
+            //console.log(fullCallbackName);
             return true;
         }
     }
@@ -136,6 +140,8 @@ function handleSpecialComment(line: string, forcedFiles: string[]): boolean{
 
 
 function minifyLuaFile(relativeFilePath: string, forceAdd: boolean){
+    if(MANDATORY_FILES.includes(relativeFilePath)){ return; }
+
     const fullFilePath = join(v.libBasePath, relativeFilePath);
 
     const fileContents = readFileSync(fullFilePath, 'utf-8');

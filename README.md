@@ -42,3 +42,8 @@ Improved build command.
 ### 0.1.1
 
 Updated library
+
+### 0.1.2
+
+Updated library
+Fixed mandatory callback files not being added
