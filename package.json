@@ -11,23 +11,23 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:library-of-isaac-extension.build-project",
-    "onCommand:library-of-isaac-extension.init-project"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "library-of-isaac-extension.build-project",
-        "title": "Build Isaac Project"
+        "title": "Library of Isaac: Build Isaac Project"
       },
       {
         "command": "library-of-isaac-extension.init-project",
-        "title": "Init Isaac Project"
+        "title": "Library of Isaac: Initialize Library Of Isaac Project"
       }
     ]
   },
+  "activationEvents": [
+    "onLanguage:lua",
+    "workspaceContains:**/TSIL.lua"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",
+    "@types/luaparse": "^0.2.11",
     "@types/mocha": "^10.0.0",
     "@types/node": "16.x",
     "@types/vscode": "^1.73.0",

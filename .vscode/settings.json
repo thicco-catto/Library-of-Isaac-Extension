@@ -10,5 +10,6 @@
     "typescript.tsc.autoDetect": "off",
     "files.associations": {
         "*.anm2": "xml"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
