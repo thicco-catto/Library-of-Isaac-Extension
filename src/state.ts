@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
  * @param context
  * @returns 
  */
-export function GetState(context: vscode.ExtensionContext) {
+export function getState(context: vscode.ExtensionContext) {
     return new State(context);
 }
 

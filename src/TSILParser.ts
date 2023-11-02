@@ -168,7 +168,13 @@ export function parseLuaFile(luaString : string){
 
 function treeToSet(tree: TreeNode, prefix = "", used = new Set<string>): Set<string>{
     if(tree.children.length === 0){
-        return used.add(prefix + tree.key);
+        const module = prefix + tree.key;
+
+        if(module.startsWith("TSIL.Enums") && !module.startsWith("TSIL.Enums.CustomCallback")) {
+            return used.add(prefix.substring(0, prefix.length-1));
+        } else if (module !== "TSIL") {
+            return used.add(prefix + tree.key);
+        }
     }else{
         tree.children.forEach(child => {
             treeToSet(child, prefix + tree.key + ".", used);

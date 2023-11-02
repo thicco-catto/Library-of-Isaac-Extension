@@ -2,8 +2,8 @@
   "name": "library-of-isaac-extension",
   "publisher": "ThiccoCatto",
   "displayName": "Library Of Isaac Extension",
-  "description": "Helper extension to develop mods using the library of Isaac.",
-  "version": "0.1.2",
+  "description": "Helper extension to develop mods using the Library of Isaac.",
+  "version": "1.0.0",
   "repository": "https://github.com/thicco-catto/Library-of-Isaac-Extension",
   "engines": {
     "vscode": "^1.73.0"
@@ -16,7 +16,7 @@
     "commands": [
       {
         "command": "library-of-isaac-extension.build-project",
-        "title": "Library of Isaac: Build Isaac Project"
+        "title": "Library of Isaac: Build Library Of Isaac Project"
       },
       {
         "command": "library-of-isaac-extension.init-project",
@@ -30,11 +30,13 @@
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ && npm run copylibrary",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+
+    "copylibrary": "node scripts/copyLibrary.js"
   },
   "devDependencies": {
     "@types/glob": "^8.0.0",

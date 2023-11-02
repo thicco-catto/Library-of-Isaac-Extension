@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
-import { GetState } from './state';
+import { getState } from './state';
 import * as path from "path";
 
 const TSIL_MAIN_FILE_NAME = "TSIL.lua";
@@ -17,7 +17,7 @@ const NO = "No";
  * @param context 
  */
 export async function checkToActivate(context: vscode.ExtensionContext) {
-	const state = GetState(context);
+	const state = getState(context);
 
 	if(state.hasAskedToInit) {
 		return;
@@ -105,7 +105,7 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 		luaConfig["workspace.ignoreDir"].push(relativeFolderPath);
 	} else {
 		console.log("TSIL not found in the workspace, initializing accodingly.");
-		libPath = path.join(context.extensionPath, "out", "emmylua");
+		libPath = path.join(context.extensionPath, "out", "library_of_isaac");
 	}
 
 	// Add TSIL global
@@ -113,7 +113,9 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 		luaConfig["diagnostics.globals"] = [];
 	}
 
-	luaConfig["diagnostics.globals"].push("TSIL");
+	if(!luaConfig["diagnostics.globals"].includes("TSIL")) {
+		luaConfig["diagnostics.globals"].push("TSIL");
+	}
 
 	// Add docs file to library
 	if(!luaConfig["workspace.library"]) {

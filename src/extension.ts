@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
-import { buildProject } from './buildProject';
-import { GetState } from './state';
+import * as vscode from 'vscode'; 
+import { getState } from './state';
 import { activateTSIL, checkToActivate } from './activation';
+import { buildProject } from './buildProject';
 
 export function activate(context: vscode.ExtensionContext) {
-	const state = GetState(context);
+	const state = getState(context);
 
 	// Add init command
 	let initProjectCMD = vscode.commands.registerCommand(

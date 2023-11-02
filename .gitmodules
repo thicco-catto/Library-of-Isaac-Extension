@@ -1,0 +1,3 @@
+[submodule "library_of_isaac"]
+	path = src/library_of_isaac
+	url = https://github.com/Team-Compliance/libraryofisaac
