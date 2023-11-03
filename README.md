@@ -7,7 +7,7 @@
 
 The Library of Isaac is a repository packed with missing enums, frequently used functions, new custom callbacks and even more incredibly useful utilities. It provides mod developers with a powerful and lightweight toolbox to help develop their projects even faster.
 
-Check out the [github repository](https://github.com/Team-Compliance/libraryofisaac) and the [documentation](https://team-compliance.gitbook.io/library-of-isaac/).
+Check out the [github repository](https://github.com/Team-Compliance/libraryofisaac) and the [documentation](https://team-compliance.gitbook.io/library-of-isaac/) for the library.
 
 ## Features
 
