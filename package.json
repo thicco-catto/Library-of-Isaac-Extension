@@ -10,7 +10,14 @@
   },
   "icon": "icon.png",
   "categories": [
+    "Programming Languages",
     "Other"
+  ],
+  "keywords": [
+    "lua",
+    "isaac",
+    "modding",
+    "mod"
   ],
   "main": "./out/extension.js",
   "contributes": {
