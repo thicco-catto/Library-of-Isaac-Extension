@@ -3,9 +3,11 @@
 ![Version (including pre-releases)](https://img.shields.io/visual-studio-marketplace/v/ThiccoCatto.library-of-isaac-extension)
 ![Downloads](https://img.shields.io/visual-studio-marketplace/i/ThiccoCatto.library-of-isaac-extension)
 
+<img src="https://imgur.com/3Z6cAMm.png" alt="drawing" width="300"></img>
+
 The Library of Isaac is a repository packed with missing enums, frequently used functions, new custom callbacks and even more incredibly useful utilities. It provides mod developers with a powerful and lightweight toolbox to help develop their projects even faster.
 
-Check out the Library github repository [here](https://github.com/Team-Compliance/libraryofisaac) and the documentation [here](https://team-compliance.gitbook.io/library-of-isaac/).
+Check out the [github repository](https://github.com/Team-Compliance/libraryofisaac) and the [documentation](https://team-compliance.gitbook.io/library-of-isaac/).
 
 ## Features
 

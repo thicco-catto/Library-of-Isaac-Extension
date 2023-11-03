@@ -8,6 +8,7 @@
   "engines": {
     "vscode": "^1.73.0"
   },
+  "icon": "icon.png",
   "categories": [
     "Other"
   ],
@@ -29,8 +30,12 @@
     "workspaceContains:**/TSIL.lua"
   ],
   "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./ && npm run copylibrary",
+    "vscode:prepublish": "npm run esbuild-base -- --minify && npm run copylibrary",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+
+    "test-compile": "tsc -p ./ && npm run copylibrary",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
@@ -47,6 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "@vscode/test-electron": "^2.1.5",
+    "esbuild": "^0.19.5",
     "eslint": "^8.24.0",
     "glob": "^8.0.3",
     "mocha": "^10.0.0",

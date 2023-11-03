@@ -59,6 +59,8 @@ async function askToActivate() {
  * @returns 
  */
 export async function activateTSIL(context: vscode.ExtensionContext) {
+	const state = getState(context);
+
 	const luaConfigPath = getLuaConfigPath();
 
 	if(!luaConfigPath) {
@@ -85,7 +87,12 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 	const isTSIL = await isTSILWorkspace();
 
 	// Path of the TSIL documentation file for autocomplete
-	let libPath = "";
+	// let libPath = "";
+
+	// Path of the docs file
+	let docsPath = "";
+	// Path of the library to be ignored by the autocomplete
+	let libPath: string | undefined = undefined;
 
 	if(isTSIL) {
 		console.log("TSIL found in the workspace, initializing accordingly.");
@@ -95,17 +102,23 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 		const folderPath = path.parse(mainFilePath).dir;
 		const relativeFolderPath = vscode.workspace.asRelativePath(folderPath);
 
-		libPath = path.join(folderPath, DOCS_FILE_NAME);
+		libPath = relativeFolderPath;
+		docsPath = path.join(folderPath, DOCS_FILE_NAME);
 
-		// Add the TSIL foler to the list of ignored directories
-		if(!luaConfig["workspace.ignoreDir"]) {
-			luaConfig["workspace.ignoreDir"] = [];
+		if(!fs.existsSync(docsPath)) {
+			console.log("Docs file not in the library, getting default one.");
+			docsPath = path.join(context.extensionPath, "out", "library_of_isaac", DOCS_FILE_NAME);
 		}
-
-		luaConfig["workspace.ignoreDir"].push(relativeFolderPath);
 	} else {
-		console.log("TSIL not found in the workspace, initializing accodingly.");
-		libPath = path.join(context.extensionPath, "out", "library_of_isaac");
+		console.log("TSIL not in workspace, initializing accordingly");
+		docsPath = path.join(context.extensionPath, "out", "library_of_isaac", DOCS_FILE_NAME);
+	}
+
+	// Remove previous config
+	if(state.hasInitialized) {
+		removeElement(luaConfig["diagnostics.globals"], "TSIL");
+		removeElement(luaConfig["workspace.library"], state.previousDocsPath);
+		removeElement(luaConfig["workspace.ignoreDir"], state.previousLibraryPath);
 	}
 
 	// Add TSIL global
@@ -113,22 +126,41 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 		luaConfig["diagnostics.globals"] = [];
 	}
 
-	if(!luaConfig["diagnostics.globals"].includes("TSIL")) {
-		luaConfig["diagnostics.globals"].push("TSIL");
-	}
+	luaConfig["diagnostics.globals"].push("TSIL");
 
-	// Add docs file to library
+	// Add docs file
 	if(!luaConfig["workspace.library"]) {
 		luaConfig["workspace.library"] = [];
 	}
 
-	luaConfig["workspace.library"].push(libPath);
+	luaConfig["workspace.library"].push(docsPath);
+
+	// Add ignored files
+	if(!luaConfig["workspace.ignoreDir"]) {
+		luaConfig["workspace.ignoreDir"] = [];
+	}
+
+	if(libPath) {
+		luaConfig["workspace.ignoreDir"].push(libPath);
+	}
 
 	// Write contents to .luarc.json
 	fs.writeFileSync(luaConfigPath, JSON.stringify(luaConfig));
 
 	console.log("TSIL initialized correctly");
 	vscode.window.showInformationMessage("TSIL has been initialized in this workspace correctly");
+
+	state.hasInitialized = true;
+	state.previousDocsPath = docsPath;
+	state.previousLibraryPath = libPath ?? "";
+}
+
+
+function removeElement<T>(a: T[], e: T) {
+	const index = a.indexOf(e);
+	if(index !== -1) {
+		a.splice(index, 1);
+	}
 }
 
 
