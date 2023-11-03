@@ -3,7 +3,7 @@
 ![Version (including pre-releases)](https://img.shields.io/visual-studio-marketplace/v/ThiccoCatto.library-of-isaac-extension)
 ![Downloads](https://img.shields.io/visual-studio-marketplace/i/ThiccoCatto.library-of-isaac-extension)
 
-<img src="https://imgur.com/3Z6cAMm.png" alt="drawing" width="300"></img>
+<img src="https://imgur.com/3Z6cAMm.png" alt="Library of Isaac Logo" width="300"></img>
 
 The Library of Isaac is a repository packed with missing enums, frequently used functions, new custom callbacks and even more incredibly useful utilities. It provides mod developers with a powerful and lightweight toolbox to help develop their projects even faster.
 
@@ -21,7 +21,7 @@ If you already have the complete library downloaded or as a submodule in your pr
 
 To enable the autocomplete to have the [Lua Language Server Extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua) installed.
 
-![Enum Autocomplete Showcase](https://imgur.com/azueo2s.png)
+<img src="https://imgur.com/azueo2s.png" alt="Enum Autocomplete Showcase" width="500"></img>
 
 ### Build Library of Isaac Project
 
@@ -47,7 +47,7 @@ As of now, there are no known issues. If you encounter any, please feel free to 
 
 ## Release Notes
 
-See [CHANGELOG.md](CHANGELOG.md) for full changes.
+See [CHANGELOG.md](CHANGELOG.md) for a full list of changes.
 
 ### 1.0.0
 

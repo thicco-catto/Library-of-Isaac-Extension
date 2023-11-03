@@ -19,6 +19,10 @@
     "modding",
     "mod"
   ],
+  "galleryBanner": {
+    "color": "#113d61",
+    "theme": "dark"
+  },
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
