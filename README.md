@@ -35,7 +35,7 @@ Otherwise, it will replace your current library in the mod with the reduced vers
 
 ## Requirements
 
-While this extension doesn't have specific requirements, we highly recommend installing the following extensions to enhance your experience:
+While this extension doesn't have specific requirements, it's highly recommended to install the following extensions to enhance your experience:
 
 - [Lua Language Server Extension](https://marketplace.visualstudio.com/items?itemName=sumneko.lua): Enables autocomplete for lua.
 
