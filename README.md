@@ -27,7 +27,7 @@ To enable the autocomplete to have the [Lua Language Server Extension](https://m
 
 This command scans your project's lua files, identifying the specific library functionalities you're utilizing, and automatically trims any unnecessary library files to optimize performance and reduce bloat.
 
-If you have the complete library downloaded or as a submodule in your project, the extension will create a new  folder called `release-mod` and place your mod files alongside the reduced library version to avoid conflicts with autocomplete.
+If you have the complete library downloaded or as a submodule in your project, the extension will create a new  folder called `release-mod` and place your mod files alongside the reduced library version to avoid conflicts.
 
 Otherwise, it will replace your current library in the mod with the reduced version, extracting the file from the built-in default version.
 
