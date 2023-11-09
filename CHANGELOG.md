@@ -1,5 +1,10 @@
 # Change Log
 
+### 1.0.1
+
+- Fixed error if ``.luarc.json`` file doesn't contain some expected fields.
+- Updated library to version 0.313.
+
 ### 1.0.0
 
 - Initial full release.

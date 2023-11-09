@@ -19,17 +19,17 @@ const NO = "No";
 export async function checkToActivate(context: vscode.ExtensionContext) {
 	const state = getState(context);
 
-	if(state.hasAskedToInit) {
+	if (state.hasAskedToInit) {
 		return;
 	}
 
 	const isTSIL = await isTSILWorkspace();
-	if(isTSIL) {
+	if (isTSIL) {
 		askToActivate().then(response => {
-			if(!response) {
+			if (!response) {
 				console.log("No response, will ask again later.");
 				return;
-			}else if(response === YES) {
+			} else if (response === YES) {
 				console.log("Answered yes, activating...");
 				activateTSIL(context);
 			}
@@ -63,14 +63,14 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 
 	const luaConfigPath = getLuaConfigPath();
 
-	if(!luaConfigPath) {
+	if (!luaConfigPath) {
 		console.log("Couldn't get the lua config path.");
 		vscode.window.showErrorMessage("Can't activate the extension since there are no workspaces open.");
 		return;
 	}
 
 	const luaConfig: any = {};
-	if(fs.existsSync(luaConfigPath)) {
+	if (fs.existsSync(luaConfigPath)) {
 		const doc = await vscode.workspace.openTextDocument(luaConfigPath);
 		const configContents = JSON.parse(doc.getText());
 
@@ -86,15 +86,12 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 
 	const isTSIL = await isTSILWorkspace();
 
-	// Path of the TSIL documentation file for autocomplete
-	// let libPath = "";
-
 	// Path of the docs file
 	let docsPath = "";
 	// Path of the library to be ignored by the autocomplete
 	let libPath: string | undefined = undefined;
 
-	if(isTSIL) {
+	if (isTSIL) {
 		console.log("TSIL found in the workspace, initializing accordingly.");
 
 		const mainFile = (await vscode.workspace.findFiles(`**/${TSIL_MAIN_FILE_NAME}`))[0];
@@ -105,7 +102,7 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 		libPath = relativeFolderPath;
 		docsPath = path.join(folderPath, DOCS_FILE_NAME);
 
-		if(!fs.existsSync(docsPath)) {
+		if (!fs.existsSync(docsPath)) {
 			console.log("Docs file not in the library, getting default one.");
 			docsPath = path.join(context.extensionPath, "out", "library_of_isaac", DOCS_FILE_NAME);
 		}
@@ -115,32 +112,38 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 	}
 
 	// Remove previous config
-	if(state.hasInitialized) {
-		removeElement(luaConfig["diagnostics.globals"], "TSIL");
-		removeElement(luaConfig["workspace.library"], state.previousDocsPath);
-		removeElement(luaConfig["workspace.ignoreDir"], state.previousLibraryPath);
+	if (state.hasInitialized) {
+		if (luaConfig["diagnostics.globals"]) {
+			removeElement(luaConfig["diagnostics.globals"], "TSIL");
+		}
+		if (luaConfig["workspace.library"]) {
+			removeElement(luaConfig["workspace.library"], state.previousDocsPath);
+		}
+		if (luaConfig["workspace.ignoreDir"]) {
+			removeElement(luaConfig["workspace.ignoreDir"], state.previousLibraryPath);
+		}
 	}
 
 	// Add TSIL global
-	if(!luaConfig["diagnostics.globals"]){
+	if (!luaConfig["diagnostics.globals"]) {
 		luaConfig["diagnostics.globals"] = [];
 	}
 
 	luaConfig["diagnostics.globals"].push("TSIL");
 
 	// Add docs file
-	if(!luaConfig["workspace.library"]) {
+	if (!luaConfig["workspace.library"]) {
 		luaConfig["workspace.library"] = [];
 	}
 
 	luaConfig["workspace.library"].push(docsPath);
 
 	// Add ignored files
-	if(!luaConfig["workspace.ignoreDir"]) {
-		luaConfig["workspace.ignoreDir"] = [];
-	}
+	if (libPath) {
+		if (!luaConfig["workspace.ignoreDir"]) {
+			luaConfig["workspace.ignoreDir"] = [];
+		}
 
-	if(libPath) {
 		luaConfig["workspace.ignoreDir"].push(libPath);
 	}
 
@@ -158,7 +161,7 @@ export async function activateTSIL(context: vscode.ExtensionContext) {
 
 function removeElement<T>(a: T[], e: T) {
 	const index = a.indexOf(e);
-	if(index !== -1) {
+	if (index !== -1) {
 		a.splice(index, 1);
 	}
 }
@@ -168,7 +171,7 @@ function removeElement<T>(a: T[], e: T) {
  * Checks if the workspace contains a file named `TSIL.lua`.
  */
 async function isTSILWorkspace() {
-	return (await vscode.workspace.findFiles(`**/${TSIL_MAIN_FILE_NAME}`)).length > 0;
+	return (await vscode.workspace.findFiles(`**/${TSIL_MAIN_FILE_NAME}`, `**/release-mod/**`)).length > 0;
 }
 
 
@@ -177,7 +180,7 @@ async function isTSILWorkspace() {
  */
 function getLuaConfigPath() {
 	const workspaceFolders = vscode.workspace.workspaceFolders;
-	if(!workspaceFolders) {
+	if (!workspaceFolders) {
 		return;
 	}
 
